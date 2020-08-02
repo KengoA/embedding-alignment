@@ -24,24 +24,17 @@ def preprocess_embedding(z):
 
 
 if __name__ == "__main__":
+    emb_dir = '../glove/data/embeddings'
+
     n_dim = 30
     for modality in ['image', 'text']:
-        # if modality == 'text':
-        #     emb = pickle.load(open('./data/real/raw/text.glove.50d.pickle','rb'))
-
-        # same modality two embeddings test
-
-        # emb_type = 'nn'
-        emb_type = 'l1'
-        # emb_type = 'l1_nn'
+        emb_type = 'nn'
         # emb_type = 'normal'
 
         if modality == 'text':
-            emb = pickle.load(open(f'./data/real/raw/{emb_type}/emb_text_dim_{n_dim}_0.pickle','rb'))
-            # emb = pickle.load(open(f'./data/real/raw/{emb_type}/emb_image_dim_{n_dim}_0.pickle','rb'))
+            emb = pickle.load(open(f'{emb_dir}/{emb_type}/emb_text_dim_{n_dim}_0.pickle','rb'))
         else:
-            emb = pickle.load(open(f'./data/real/raw/{emb_type}/emb_text_dim_{n_dim}_1.pickle','rb'))
-            # emb = pickle.load(open(f'./data/real/raw/{emb_type}/emb_image_dim_{n_dim}_0.pickle','rb'))
+            emb = pickle.load(open(f'{emb_dir}/{emb_type}/emb_text_dim_{n_dim}_1.pickle','rb'))
 
         print(list(emb.items())[0]) # check if its actually non-negative
         n_concept = len(emb.items())

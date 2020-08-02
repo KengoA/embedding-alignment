@@ -1,4 +1,0 @@
-2020/07/17 21:35:04: Ceiling Accuracy 1: 1.00 5: 1.00 10: 1.00 Half: 1.00
-
-2020/07/17 21:35:07: Restart:0        f(x) Accuracy | 1: 0.04 | 5: 0.13 | 10: 0.17 | half: 0.70        g(y) Accuracy | 1: 0.05 | 5: 0.15 | 10: 0.19 | half: 0.71    Epoch 30 Loss | total: 50.546 | cycle: 0.26 | f_dist: 24.9 | g_dist: 25.4 | f_sup: 0 | g_sup: 0
-2020/07/17 21:35:10: Restart:1        f(x) Accuracy | 1: 0.04 | 5: 0.12 | 10: 0.17 | half: 0.70        g(y) Accuracy | 1: 0.04 | 5: 0.14 | 10: 0.19 | half: 0.70    Epoch 30 Loss | total: 51.349 | cycle: 1.54 | f_dist: 24.6 | g_dist: 25.3 | f_sup: 0 | g_sup: 0
