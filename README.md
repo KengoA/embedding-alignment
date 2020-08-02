@@ -1,0 +1,2 @@
+### WIP 
+project repositoty for msc project on embedding alignment, subfolders on alignment cloned from https://github.com/roads/unsupervised-alignment-team and https://github.com/xrc10/unsup-cross-lingual-embedding-transfer
