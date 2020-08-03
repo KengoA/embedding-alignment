@@ -1342,7 +1342,7 @@ static const char __pyx_k_format[] = "format";
 static const char __pyx_k_import[] = "__import__";
 static const char __pyx_k_readline[] = "readline";
 static const char __pyx_k_cline_in_traceback[] = "cline_in_traceback";
-static const char __pyx_k_data_intermediate_cooccur[] = "../data/intermediate/cooccur_{}";
+static const char __pyx_k_data_intermediate_cooccur[] = "../../data/intermediate/cooccur_{}";
 static PyObject *__pyx_n_u_;
 static PyObject *__pyx_n_s_cline_in_traceback;
 static PyObject *__pyx_kp_u_data_intermediate_cooccur;
@@ -2193,7 +2193,7 @@ static PyObject *__pyx_f_7cooccur_count_cooccur(PyObject *__pyx_v_path, PyObject
           /* "cooccur.pyx":50
  * 
  * 
- *         with open('../data/intermediate/cooccur_{}'.format(path.split('_')[2][:-4]), 'w') as w:             # <<<<<<<<<<<<<<
+ *         with open('../../data/intermediate/cooccur_{}'.format(path.split('_')[2][:-4]), 'w') as w:             # <<<<<<<<<<<<<<
  *             json.dump(cooccur, w)
  * 
  */
@@ -2275,7 +2275,7 @@ static PyObject *__pyx_f_7cooccur_count_cooccur(PyObject *__pyx_v_path, PyObject
 
                   /* "cooccur.pyx":51
  * 
- *         with open('../data/intermediate/cooccur_{}'.format(path.split('_')[2][:-4]), 'w') as w:
+ *         with open('../../data/intermediate/cooccur_{}'.format(path.split('_')[2][:-4]), 'w') as w:
  *             json.dump(cooccur, w)             # <<<<<<<<<<<<<<
  * 
  *     del corpus
@@ -2335,7 +2335,7 @@ static PyObject *__pyx_f_7cooccur_count_cooccur(PyObject *__pyx_v_path, PyObject
                   /* "cooccur.pyx":50
  * 
  * 
- *         with open('../data/intermediate/cooccur_{}'.format(path.split('_')[2][:-4]), 'w') as w:             # <<<<<<<<<<<<<<
+ *         with open('../../data/intermediate/cooccur_{}'.format(path.split('_')[2][:-4]), 'w') as w:             # <<<<<<<<<<<<<<
  *             json.dump(cooccur, w)
  * 
  */
@@ -2743,7 +2743,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   /* "cooccur.pyx":50
  * 
  * 
- *         with open('../data/intermediate/cooccur_{}'.format(path.split('_')[2][:-4]), 'w') as w:             # <<<<<<<<<<<<<<
+ *         with open('../../data/intermediate/cooccur_{}'.format(path.split('_')[2][:-4]), 'w') as w:             # <<<<<<<<<<<<<<
  *             json.dump(cooccur, w)
  * 
  */

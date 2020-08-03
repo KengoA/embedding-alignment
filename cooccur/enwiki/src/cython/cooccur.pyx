@@ -47,7 +47,7 @@ cpdef count_cooccur(str path, list vocab):
                 del right_window
         
 
-        with open('../data/intermediate/cooccur_{}'.format(path.split('_')[2][:-4]), 'w') as w:
+        with open('../../data/intermediate/cooccur_{}'.format(path.split('_')[2][:-4]), 'w') as w:
             json.dump(cooccur, w)
     
     del corpus

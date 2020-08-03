@@ -33,8 +33,8 @@ def append_tokens_from_txt(write_dir, read_path):
                 )
 
 if __name__ == "__main__":
-    write_dir = '../data/preprocessed/'
-    read_dir = '../data/streams/'
+    write_dir = './data/preprocessed/'
+    read_dir = './data/streams/'
 
     read_paths = sorted(glob.glob(read_dir+'enwiki_*'))
     stream_times = []

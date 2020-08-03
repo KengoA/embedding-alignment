@@ -6,9 +6,16 @@
 /build/
 
 # data files
-*.csv
+# openimages data
+cooccur/openimages/data/raw/*.csv
+cooccur/openimages/data/preprocessed/*.csv
+
+# enwiki data
 cooccur/enwiki/data/raw/*.txt.bz2
 cooccur/enwiki/data/raw/*.txt
+cooccur/enwiki/data/streams/*
+cooccur/enwiki/data/intermediate/*
+cooccur/enwiki/data/preprocessed/*.txt
 
 # Python egg metadata, regenerated from source files by setuptools.
 /*.egg-info
@@ -18,3 +25,4 @@ cooccur/enwiki/data/raw/*.txt
 .cache/*
 .pytest_cache/*
 */venv/*
+venv/*

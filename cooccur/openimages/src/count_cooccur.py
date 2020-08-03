@@ -6,7 +6,7 @@ import pandas as pd
 from tqdm import tqdm
 
 if __name__ == "__main__":
-    df_vocab_mid = pd.read_csv('../../vocab/intersect_vocab.csv')
+    df_vocab_mid = pd.read_csv('../vocab/intersect_vocab.csv')
     
     VOCAB = df_vocab_mid['name'].values.tolist()
     MID = df_vocab_mid['mid'].values.tolist()
@@ -16,7 +16,7 @@ if __name__ == "__main__":
     for mid, name in zip(MID, VOCAB):
         mid2name[mid] = name
 
-    df = pd.read_csv('../data/preorocessed/open-images.csv')
+    df = pd.read_csv('./data/preprocessed/open-images.csv')
 
     cooccur_mid = {concept: {context: 0 for context in MID} for concept in MID}
     cooccur_name = {concept: {context: 0 for context in VOCAB} for concept in VOCAB}
@@ -44,7 +44,7 @@ if __name__ == "__main__":
                                                                             np.max(image_classes)))
     print("total cooccurrence counted: {}".format(count))
 
-    save_dir = '../../../glove/data/cooccur/'
+    save_dir = '../../glove/data/cooccur/'
     with open(save_dir+'cooccur_image_name.json', 'w') as w:
         json.dump(cooccur_name, w)
 
