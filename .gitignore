@@ -5,6 +5,11 @@
 /dist/
 /build/
 
+# data files
+*.csv
+cooccur/enwiki/data/raw/*.txt.bz2
+cooccur/enwiki/data/raw/*.txt
+
 # Python egg metadata, regenerated from source files by setuptools.
 /*.egg-info
 /*.egg
