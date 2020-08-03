@@ -1,0 +1,2 @@
+model_checkpoint_path: "/home/karolis/Desktop/cross-lingual-embedding-transfer/exp/text-image/model.ckpt"
+all_model_checkpoint_paths: "/home/karolis/Desktop/cross-lingual-embedding-transfer/exp/text-image/model.ckpt"

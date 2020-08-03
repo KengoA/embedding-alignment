@@ -8,7 +8,7 @@ from tqdm import tqdm
 import errno
 
 import tensorflow as tf
-import tensorflow.contrib.layers as ly
+import tensorflow.keras.layers as ly
 from tensorflow.python import debug as tf_debug
 
 from utils.callbacks import SGDWR, EarlyStopper, ModelChecker
@@ -102,8 +102,8 @@ class CycleAlignEmb(CycleEmb):
             # take care of the initial dictionary
             # F_init_count = np.count_nonzero(self.F_init)
             # print('F_init_count', F_init_count)
-            F_init_row = tf.convert_to_tensor(self.F_init_row, dtype=tf.float32)
-            F_init_col = tf.convert_to_tensor(self.F_init_col, dtype=tf.float32)
+            F_init_row = tf.convert_to_tensor(value=self.F_init_row, dtype=tf.float32)
+            F_init_col = tf.convert_to_tensor(value=self.F_init_col, dtype=tf.float32)
 
             self.init_vecs_list = [None, None]
             self.init_vecs_list[0] = self.vecs_list[0][s_nz_idx,:]
@@ -141,17 +141,17 @@ class CycleAlignEmb(CycleEmb):
         self.set_summary()
 
     def set_summary(self):
-        tf.summary.scalar('discriminator loss', self.l_disc)
-        tf.summary.scalar('wgan transformation(generator) loss', self.l_trans_wgan)
-        tf.summary.scalar('sinkhorn transformation loss', self.l_trans_sh)
-        tf.summary.scalar('reconstruct loss', self.reconstruct_loss)
-        tf.summary.scalar('init alignment loss', self.init_align_loss)
-        tf.summary.scalar('sinkhorn distance', self.sinkhorn_distance)
+        tf.compat.v1.summary.scalar('discriminator loss', self.l_disc)
+        tf.compat.v1.summary.scalar('wgan transformation(generator) loss', self.l_trans_wgan)
+        tf.compat.v1.summary.scalar('sinkhorn transformation loss', self.l_trans_sh)
+        tf.compat.v1.summary.scalar('reconstruct loss', self.reconstruct_loss)
+        tf.compat.v1.summary.scalar('init alignment loss', self.init_align_loss)
+        tf.compat.v1.summary.scalar('sinkhorn distance', self.sinkhorn_distance)
         if len(self.trans_hidden_dim) == 0:
             W = self.Ws_s2t[0]
-            self.orth_loss = tf.norm(tf.matmul(W, W, transpose_a=True)-tf.eye(self.emb_dim_list[0]), ord='fro', axis=(0,1))
-            tf.summary.scalar('orth_loss', self.orth_loss)
-        self.merged_summary = tf.summary.merge_all()
+            self.orth_loss = tf.norm(tensor=tf.matmul(W, W, transpose_a=True)-tf.eye(self.emb_dim_list[0]), ord='fro', axis=(0,1))
+            tf.compat.v1.summary.scalar('orth_loss', self.orth_loss)
+        self.merged_summary = tf.compat.v1.summary.merge_all()
 
     def train(self, batch_size=128, lr=0.001, epoch=10000, wgan_epoch=2000, logger=None, validation=None, dp_keep_prob=1.0, patience=PATIENCE, min_delta = MIN_DELTA):
         """ 
@@ -164,19 +164,19 @@ class CycleAlignEmb(CycleEmb):
         early_stopper = EarlyStopper(patience*batch_per_epoch, min_delta)
         model_checker = ModelChecker()
 
-        learning_rate = tf.placeholder(tf.float32, shape=[])
+        learning_rate = tf.compat.v1.placeholder(tf.float32, shape=[])
         lr_schedule_dict = SGDWR(T_total=epoch, T_0=10, T_mult=1.2, lr_max=lr, lr_min=lr/100)
 
         if self.F_init is None: # we will switch from WGAN to Sinkhorn during training
             swith_flag = False # first WGAN and then Sinkhorn
             # swith_flag = True # Use Sinkhorn all the time
 
-        with tf.Session(config=self.session_conf) as sess:
+        with tf.compat.v1.Session(config=self.session_conf) as sess:
             # sess = tf_debug.LocalCLIDebugWrapperSession(sess)
             # sess.add_tensor_filter("has_inf_or_nan", tf_debug.has_inf_or_nan)
-            self.writer = tf.summary.FileWriter(os.path.join(self.save_path, 'graph'), graph=sess.graph)
+            self.writer = tf.compat.v1.summary.FileWriter(os.path.join(self.save_path, 'graph'), graph=sess.graph)
             if self.saver is None:
-                self.saver = tf.train.Saver(tf.global_variables())
+                self.saver = tf.compat.v1.train.Saver(tf.compat.v1.global_variables())
                 # self.saver = tf.train.Saver(trans_variables)
             global_step = tf.Variable(0, name="global_step", trainable=False)
             
@@ -188,9 +188,9 @@ class CycleAlignEmb(CycleEmb):
             if self.F_init is None:
                 disc_variables = self.Ws_s_vs_fs + self.bs_s_vs_fs + self.Ws_t_vs_ft + self.bs_t_vs_ft
 
-            update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+            update_ops = tf.compat.v1.get_collection(tf.compat.v1.GraphKeys.UPDATE_OPS)
             with tf.control_dependencies(update_ops):
-                sh_trans_optimizer = tf.train.RMSPropOptimizer(learning_rate=learning_rate)
+                sh_trans_optimizer = tf.compat.v1.train.RMSPropOptimizer(learning_rate=learning_rate)
                 # cliping the weight norm
                 # grads_and_vars = sh_trans_optimizer.compute_gradients(self.l_trans_sh)
                 # capped_grads_and_vars = [(tf.clip_by_norm(gv[0], clip_norm=10, axes=0), gv[1])
@@ -199,12 +199,12 @@ class CycleAlignEmb(CycleEmb):
                 sh_trans_train_op = sh_trans_optimizer.minimize(self.l_trans_sh, global_step=global_step, var_list=trans_variables)
 
                 if self.F_init is None:
-                    wgan_trans_optimizer = tf.train.RMSPropOptimizer(learning_rate=learning_rate*10)
+                    wgan_trans_optimizer = tf.compat.v1.train.RMSPropOptimizer(learning_rate=learning_rate*10)
                     wgan_trans_train_op = wgan_trans_optimizer.minimize(self.l_trans_wgan, global_step=global_step, var_list=trans_variables)
-                    disc_optimizer = tf.train.RMSPropOptimizer(learning_rate=learning_rate)
+                    disc_optimizer = tf.compat.v1.train.RMSPropOptimizer(learning_rate=learning_rate)
                     disc_train_op = disc_optimizer.minimize(self.l_disc, var_list=disc_variables)
 
-            sess.run(tf.global_variables_initializer())
+            sess.run(tf.compat.v1.global_variables_initializer())
             step = 0
 
             batches_src = uniform_batch_iter([self.vecs_list[0], self.freq_list[0]], batch_size=batch_size, num_epochs=epoch, shuffle=True, full_batch=True, verbose=False)
@@ -300,8 +300,8 @@ class CycleAlignEmb(CycleEmb):
                         # print('nnr_tgt[:10]:', nnr_tgt[:10])
                         val_acc = knn_accuracy_from_list(nnr_tgt, validation[1], k=1)
                         stdout_buffer += 'Bilex acc:{0:.4f} '.format(val_acc)
-                        val_acc_value = tf.Summary.Value(tag='val_acc', simple_value=val_acc)
-                        self.writer.add_summary(tf.Summary(value=[val_acc_value]), step)
+                        val_acc_value = tf.compat.v1.Summary.Value(tag='val_acc', simple_value=val_acc)
+                        self.writer.add_summary(tf.compat.v1.Summary(value=[val_acc_value]), step)
 
                     stdout_buffer += 'Validation eclipsed time \n'.format(time.time()-validation_start_time)
                     sys.stdout.write(stdout_buffer)

@@ -12,7 +12,7 @@ TRAIN_MAX_SIZE=200 # the top N words included in training
 
 python src/make_synthetic_data.py
 
-train the word embedding
+# train the word embedding
 python src/runner.py \
     --config_path src/config/config.json \
     --src "$SRC_LANG" --tgt "$TGT_LANG" \
@@ -25,9 +25,9 @@ python src/runner.py \
 
 # evaluate the trained embeddings
 python src/eval/eval_translation.py \
-    exp/"$SRC_LANG"-"$TGT_LANG"/src.emb.txt exp/"$SRC_LANG"-"$TGT_LANG"/tgt.trans.emb.txt \
+    ./src/exp/"$SRC_LANG"-"$TGT_LANG"/src.emb.txt ./src/exp/"$SRC_LANG"-"$TGT_LANG"/tgt.trans.emb.txt \
     -d data/crosslingual/dictionaries/"$SRC_LANG"-"$TGT_LANG".txt \
 
 python src/eval/eval_translation.py \
-    exp/"$SRC_LANG"-"$TGT_LANG"/tgt.emb.txt exp/"$SRC_LANG"-"$TGT_LANG"/src.trans.emb.txt \
+    ./src/exp/"$SRC_LANG"-"$TGT_LANG"/tgt.emb.txt ./src/exp/"$SRC_LANG"-"$TGT_LANG"/src.trans.emb.txt \
     -d data/crosslingual/dictionaries/"$TGT_LANG"-"$SRC_LANG".txt \

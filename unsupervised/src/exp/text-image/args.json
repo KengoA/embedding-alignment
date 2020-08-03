@@ -1,0 +1,1 @@
+{"config_path": "src/config/config.json", "F_file": null, "F_validation": "./data/crosslingual/dictionaries/text-image.txt", "seed_size": 50, "src": "text", "src_vec": "./data/real/text.vec", "src_freq": null, "tgt": "image", "tgt_vec": "./data/real/image.vec", "tgt_freq": null, "train_max_size": 429, "trans_max_size": 200000, "save": "./exp/", "train": 1, "log": null}

@@ -148,4 +148,4 @@ if __name__ == '__main__':
         logger.info('Saving source/transferred target embeddings...')
         model.save_emb(os.path.join(args.save, '{}-{}'.format(args.src, args.tgt), rel_path))
 
-        tf.reset_default_graph()
+        tf.compat.v1.reset_default_graph()

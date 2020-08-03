@@ -1,0 +1,1 @@
+{"config_path": "src/config/config.json", "F_file": null, "F_validation": "./data/crosslingual/dictionaries/z_0-z_1.txt", "seed_size": 50, "src": "z_0", "src_vec": "./data/synthetic/z_0.vec", "src_freq": null, "tgt": "z_1", "tgt_vec": "./data/synthetic/z_1.vec", "tgt_freq": null, "train_max_size": 200, "trans_max_size": 200000, "save": "./exp/", "train": 1, "log": null}

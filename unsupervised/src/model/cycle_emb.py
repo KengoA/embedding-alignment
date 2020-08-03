@@ -21,6 +21,8 @@ USE_EUC_DIST = False
 TIED_WEIGHTS = True
 ORTH_INIT = True
 
+tf.compat.v1.disable_eager_execution()
+
 ################################################################################
 ### The parent class for transfer-based embedding model
 
@@ -37,8 +39,8 @@ class CycleEmb:
         self.save_path = save_path
         self.norm = norm
         mkdir_p(save_path)
-        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.2)
-        self.session_conf = tf.ConfigProto(
+        gpu_options = tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=0.2)
+        self.session_conf = tf.compat.v1.ConfigProto(
           allow_soft_placement=True,
           log_device_placement=False,
           gpu_options=gpu_options)
@@ -80,27 +82,27 @@ class CycleEmb:
             
     def build_input_layers(self):
         # input embeddings
-        self.input_s = tf.placeholder(tf.float32, shape = [None, self.emb_dim_list[0]], name='souce_emb_input')
-        self.input_t = tf.placeholder(tf.float32, shape = [None, self.emb_dim_list[1]], name='target_emb_input')
+        self.input_s = tf.compat.v1.placeholder(tf.float32, shape = [None, self.emb_dim_list[0]], name='souce_emb_input')
+        self.input_t = tf.compat.v1.placeholder(tf.float32, shape = [None, self.emb_dim_list[1]], name='target_emb_input')
 
-        self.freq_s = tf.placeholder(tf.float32, shape = [None,], name='souce_freq_input')
-        self.freq_t = tf.placeholder(tf.float32, shape = [None,], name='target_freq_input')
+        self.freq_s = tf.compat.v1.placeholder(tf.float32, shape = [None,], name='souce_freq_input')
+        self.freq_t = tf.compat.v1.placeholder(tf.float32, shape = [None,], name='target_freq_input')
 
         # self.freq_s = tf.ones([tf.shape(self.input_s)[0], 1], tf.float32)/tf.cast(tf.shape(self.input_s)[0], dtype=tf.float32)
         # self.freq_t = tf.ones([tf.shape(self.input_t)[0], 1], tf.float32)/tf.cast(tf.shape(self.input_t)[0], dtype=tf.float32)
 
-        self.dp_keep_prob = tf.placeholder_with_default(1.0, shape=())
+        self.dp_keep_prob = tf.compat.v1.placeholder_with_default(1.0, shape=())
 
-        self.phase = tf.placeholder(tf.bool, name='phase') # True if in training phrase, False elsewise
+        self.phase = tf.compat.v1.placeholder(tf.bool, name='phase') # True if in training phrase, False elsewise
         if self.trans_activation == 'selu':
             self.input_s = tf.contrib.nn.alpha_dropout(self.input_s, self.dp_keep_prob)
             self.input_t = tf.contrib.nn.alpha_dropout(self.input_t, self.dp_keep_prob)
         else:
-            self.input_s = tf.nn.dropout(self.input_s, self.dp_keep_prob)
-            self.input_t = tf.nn.dropout(self.input_t, self.dp_keep_prob)
+            self.input_s = tf.nn.dropout(self.input_s, 1 - (self.dp_keep_prob))
+            self.input_t = tf.nn.dropout(self.input_t, 1 - (self.dp_keep_prob))
         if self.F_init is not None:
-            self.input_s_init = tf.placeholder(tf.float32, shape = [None, self.emb_dim_list[0]], name='souce_emb_input_init')
-            self.input_t_init = tf.placeholder(tf.float32, shape = [None, self.emb_dim_list[1]], name='target_emb_input_init')
+            self.input_s_init = tf.compat.v1.placeholder(tf.float32, shape = [None, self.emb_dim_list[0]], name='souce_emb_input_init')
+            self.input_t_init = tf.compat.v1.placeholder(tf.float32, shape = [None, self.emb_dim_list[1]], name='target_emb_input_init')
 
     def build_transfer_layers(self, multiple_noise_std=None, tied_weights=TIED_WEIGHTS):    
         # embedding transfer layers
@@ -109,7 +111,7 @@ class CycleEmb:
         self.trans_s = l2_norm(trans_s) if USE_NORM_LAYER else trans_s
         
         if tied_weights:
-            self.Ws_t2s = [tf.transpose(W) for W in reversed(self.Ws_s2t)]
+            self.Ws_t2s = [tf.transpose(a=W) for W in reversed(self.Ws_s2t)]
             trans_t, _, _ = dense_layers(input_layer=self.input_t, input_dim=self.emb_dim_list[1], hidden_dim=self.trans_hidden_dim, output_dim=self.emb_dim_list[0], Ws=self.Ws_t2s, name='fc-tgt2src', activation=self.trans_activation, bias=False, orth_init=ORTH_INIT, add_multiple_noise=multiple_noise_std, BN=self.use_BN, BN_phase=self.phase, BN_reuse=False)
         else:
             trans_t, self.Ws_t2s, _ = dense_layers(input_layer=self.input_t, input_dim=self.emb_dim_list[1], hidden_dim=self.trans_hidden_dim, output_dim=self.emb_dim_list[0], name='fc-tgt2src', activation=self.trans_activation, bias=False, orth_init=ORTH_INIT, add_multiple_noise=multiple_noise_std, BN=self.use_BN, BN_phase=self.phase, BN_reuse=False)
@@ -133,22 +135,22 @@ class CycleEmb:
     def build_recontruction_layers(self):
         if self.cyc_loss:
             if USE_EUC_DIST:
-                self.reconstruct_loss = euclidean_distance(self.input_s, self.trans_back_s) / (tf.cast(tf.shape(self.input_s)[0], tf.float32)) + euclidean_distance(self.input_t, self.trans_back_t) / (tf.cast(tf.shape(self.input_t)[0], tf.float32))
+                self.reconstruct_loss = euclidean_distance(self.input_s, self.trans_back_s) / (tf.cast(tf.shape(input=self.input_s)[0], tf.float32)) + euclidean_distance(self.input_t, self.trans_back_t) / (tf.cast(tf.shape(input=self.input_t)[0], tf.float32))
             else:
-                self.reconstruct_loss = 2 - (cosine_similarity(self.input_s, self.trans_back_s)) / (tf.cast(tf.shape(self.input_s)[0], tf.float32)) - (cosine_similarity(self.input_t, self.trans_back_t)) / (tf.cast(tf.shape(self.input_t)[0], tf.float32))
+                self.reconstruct_loss = 2 - (cosine_similarity(self.input_s, self.trans_back_s)) / (tf.cast(tf.shape(input=self.input_s)[0], tf.float32)) - (cosine_similarity(self.input_t, self.trans_back_t)) / (tf.cast(tf.shape(input=self.input_t)[0], tf.float32))
         else:
             if USE_EUC_DIST:
-                self.reconstruct_loss = euclidean_distance(self.input_t, self.trans_back_t) / (tf.cast(tf.shape(self.input_t)[0], tf.float32))
+                self.reconstruct_loss = euclidean_distance(self.input_t, self.trans_back_t) / (tf.cast(tf.shape(input=self.input_t)[0], tf.float32))
             else:
-                self.reconstruct_loss = 1 - (cosine_similarity(self.input_t, self.trans_back_t)) / (tf.cast(tf.shape(self.input_t)[0], tf.float32))
+                self.reconstruct_loss = 1 - (cosine_similarity(self.input_t, self.trans_back_t)) / (tf.cast(tf.shape(input=self.input_t)[0], tf.float32))
 
     def build_nearest_neighbor(self):
         # compute nearest neighbor given two input embeddings
         # assuming they are both l2-normalized
-        self.nn_query = tf.placeholder(tf.float32, shape = [None, self.emb_dim_list[0]], name='nn_query_emb')
-        self.nn_search = tf.placeholder(tf.float32, shape = [None, self.emb_dim_list[0]], name='nn_search_emb')
+        self.nn_query = tf.compat.v1.placeholder(tf.float32, shape = [None, self.emb_dim_list[0]], name='nn_query_emb')
+        self.nn_search = tf.compat.v1.placeholder(tf.float32, shape = [None, self.emb_dim_list[0]], name='nn_search_emb')
         self.q2s_sim = tf.matmul(self.nn_query, self.nn_search, transpose_b=True)
-        self.nnr_idx = tf.argmax(self.q2s_sim, axis=1)
+        self.nnr_idx = tf.argmax(input=self.q2s_sim, axis=1)
 
     def transfer_tgt_emb(self, batch_size=128, sess=None):
         """ 
@@ -156,9 +158,9 @@ class CycleEmb:
         """
         self.trans_vecs = [np.zeros(self.vecs_list[0].shape), np.zeros(self.vecs_list[1].shape)]
         if sess is None:
-            sess = tf.Session(config=self.session_conf)
+            sess = tf.compat.v1.Session(config=self.session_conf)
             if self.saver is None:
-                self.saver = tf.train.Saver(tf.global_variables())
+                self.saver = tf.compat.v1.train.Saver(tf.compat.v1.global_variables())
             self.saver.restore(sess, os.path.join(self.save_path,'model.ckpt'))
         for i in [0, 1]:
             batches_tst = uniform_batch_iter([self.vecs_list[i]], batch_size=batch_size, num_epochs=1, shuffle=False, full_batch=False)
@@ -237,7 +239,7 @@ class CycleEmb:
             search_words = self.words_list[0]
 
         if sess is None:
-            sess = tf.Session(config=self.session_conf)
+            sess = tf.compat.v1.Session(config=self.session_conf)
             self.saver.restore(sess, os.path.join(self.save_path, 'model.ckpt'))
 
         nnr_idx = np.zeros([q_word_vecs.shape[0]])
