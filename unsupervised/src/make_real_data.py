@@ -14,27 +14,30 @@ def preprocess_embedding(z):
     gmm.fit(z)
     mu = gmm.means_[0]
     sigma = gmm.covariances_[0]
-    # z_norm = (z - mu) / sigma
     z_norm = z - mu
-    max_val = np.max(np.abs(z_norm))
-    z_norm = z_norm / max_val
-    z_norm = z_norm / 2  # TODO experimenting with different scales here
-    # z_norm + 1  # TODO
+    z_norm /= np.max(np.abs(z_norm))
+    z_norm /= 2  # TODO experimenting with different scales here
+    
     return z_norm
 
 
 if __name__ == "__main__":
-    emb_dir = '../glove/data/embeddings'
-
     n_dim = 30
     for modality in ['image', 'text']:
-        emb_type = 'nn'
-        # emb_type = 'normal'
+        # if modality == 'text':
+            # emb = pickle.load(open('./data/real/raw/text.glove.50d.pickle','rb'))
+
+        # same modality two embeddings test
+
+        # emb_type = 'nn'
+        emb_type = 'normal'
 
         if modality == 'text':
-            emb = pickle.load(open(f'{emb_dir}/{emb_type}/emb_text_dim_{n_dim}_0.pickle','rb'))
+            # emb = pickle.load(open(f'./data/real/raw/{emb_type}/emb_text_dim_{n_dim}_2.pickle','rb'))
+            emb = pickle.load(open(f'./data/real/raw/{emb_type}/emb_image_dim_{n_dim}_3.pickle','rb'))
         else:
-            emb = pickle.load(open(f'{emb_dir}/{emb_type}/emb_text_dim_{n_dim}_1.pickle','rb'))
+            # emb = pickle.load(open(f'./data/real/raw/{emb_type}/emb_text_dim_{n_dim}_8.pickle','rb'))
+            emb = pickle.load(open(f'./data/real/raw/{emb_type}/emb_image_dim_{n_dim}_9.pickle','rb'))
 
         print(list(emb.items())[0]) # check if its actually non-negative
         n_concept = len(emb.items())
@@ -96,3 +99,4 @@ if __name__ == "__main__":
     
     
         
+    

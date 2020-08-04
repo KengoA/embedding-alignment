@@ -1,2 +1,0 @@
-model_checkpoint_path: "/home/karolis/Desktop/cross-lingual-embedding-transfer/exp/z_0-z_1/model.ckpt"
-all_model_checkpoint_paths: "/home/karolis/Desktop/cross-lingual-embedding-transfer/exp/z_0-z_1/model.ckpt"

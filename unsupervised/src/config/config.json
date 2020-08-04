@@ -13,6 +13,6 @@
     "norm":"scale",
     "dp_keep_prob":1.0,
     "epoch":4000,
-    "wgan_epoch":500,
+    "wgan_epoch":1000,
     "batch_size":429
 }

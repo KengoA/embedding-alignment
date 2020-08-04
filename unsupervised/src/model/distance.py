@@ -14,16 +14,16 @@ ETA=1e-8
 
 # @function.Defun(tf.float32, grad_func=norm_grad)
 def norm(x):
-    return tf.norm(tensor=x, axis=1, keepdims=True)
+    return tf.norm(x, axis=1, keep_dims=True)
 
 def l2_norm(a):
-    norm_a = tf.sqrt(tf.reduce_sum(input_tensor=tf.square(a), axis=1, keepdims=True)+ETA)
+    norm_a = tf.sqrt(tf.reduce_sum(tf.square(a), 1, keep_dims=True)+ETA)
     # norm_a = norm(a)
     normalize_a = a/(norm_a)
     return normalize_a
 
 def l1_norm(a):
-    norm_a = tf.reduce_sum(input_tensor=a, keepdims=True)
+    norm_a = tf.reduce_sum(a, keep_dims=True)
     normalize_a = a/(norm_a)
     return normalize_a
 
@@ -33,7 +33,7 @@ def cosine_similarity(a, b):
     """
     normalize_a = l2_norm(a)      
     normalize_b = l2_norm(b)
-    return tf.reduce_sum(input_tensor=tf.multiply(normalize_a,normalize_b))
+    return tf.reduce_sum(tf.multiply(normalize_a,normalize_b))
 
 def cosine_similarity_matrix(a, b):
     """ 
@@ -41,17 +41,17 @@ def cosine_similarity_matrix(a, b):
     """
     normalize_a = l2_norm(a)      
     normalize_b = l2_norm(b)
-    return tf.matmul(normalize_a, tf.transpose(a=normalize_b))
+    return tf.matmul(normalize_a, tf.transpose(normalize_b))
 
 def euclidean_distance(a, b):
     # return tf.reduce_sum(tf.norm(tf.subtract(a, b), ord='euclidean', axis=1))
-    return tf.reduce_sum(input_tensor=tf.sqrt(tf.reduce_sum(input_tensor=tf.square(tf.subtract(a, b)), axis=1)+ETA))
+    return tf.reduce_sum(tf.sqrt(tf.reduce_sum(tf.square(tf.subtract(a, b)), 1)+ETA))
 
 def euclidean_distance_matrix(a, b):
-    batch_size = tf.shape(input=a)[0]
-    aaT = tf.matmul(a, tf.transpose(a=a))
-    bbT = tf.matmul(b, tf.transpose(a=b))
-    l2 = tf.maximum(aaT + bbT - 2*tf.matmul(a, tf.transpose(a=b)), ETA*tf.ones([batch_size,batch_size], tf.float32))
+    batch_size = tf.shape(a)[0]
+    aaT = tf.matmul(a, tf.transpose(a))
+    bbT = tf.matmul(b, tf.transpose(b))
+    l2 = tf.maximum(aaT + bbT - 2*tf.matmul(a, tf.transpose(b)), ETA*tf.ones([batch_size,batch_size], tf.float32))
     return tf.sqrt(l2)
 
 # def euclidean_distance_matrix(a, b):

@@ -21,6 +21,7 @@ cooccur/enwiki/data/preprocessed/*.txt
 # unsupervised alignment
 unsupervised/src/utils/__pycache__/*
 unsupervised/src/exp/*/graph/*
+unsupervised/misc/*
 
 # Python egg metadata, regenerated from source files by setuptools.
 /*.egg-info
@@ -29,5 +30,5 @@ unsupervised/src/exp/*/graph/*
 .vscode/*
 .cache/*
 .pytest_cache/*
-*/venv/*
+*/venv_tf1/*
 venv/*
