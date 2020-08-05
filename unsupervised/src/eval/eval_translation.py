@@ -20,16 +20,27 @@ import argparse
 import collections
 import numpy as np
 import sys
+import os
+import logging
 
 
-BATCH_SIZE = 500
+BATCH_SIZE = 429
 
+def get_logger(p):
+    logger = logging.getLogger(__name__)
+    hdlr = logging.FileHandler(p)
+    formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+    hdlr.setFormatter(formatter)
+    logger.addHandler(hdlr)
+    logger.setLevel(logging.INFO)
+    return logger
 
 def main():
     # Parse command line arguments
     parser = argparse.ArgumentParser(description='Evaluate embeddings of two languages in a shared space in word translation induction')
     parser.add_argument('src_embeddings', help='the source language embeddings')
     parser.add_argument('trg_embeddings', help='the target language embeddings')
+    parser.add_argument('--exp_dir', help='exp directory')
     parser.add_argument('-d', '--dictionary', default=sys.stdin.fileno(), help='the test dictionary file (defaults to stdin)')
     parser.add_argument('--retrieval', default='nn', choices=['nn', 'invnn', 'invsoftmax'], help='the retrieval method (nn: standard nearest neighbor; invnn: inverted nearest neighbor; invsoftmax: inverted softmax)')
     parser.add_argument('--inv_temperature', default=1, type=float, help='the inverse temperature (only compatible with inverted softmax)')
@@ -133,9 +144,13 @@ def main():
             for k in range(j-i):
                 translation[src[i+k]] = nn[k]
 
+
+    logger = get_logger(os.path.join(args.exp_dir, 'eval_acc.log'))
+
     # Compute accuracy
     accuracy = np.mean([1 if translation[i] in src2trg[i] else 0 for i in src])
     print('Coverage:{0:7.2%}  Accuracy:{1:7.2%}'.format(coverage, accuracy))
+    logger.info('Accuracy:{1:7.2%}'.format(coverage, accuracy))
     sys.exit("{0:.2f}".format(float(100)*accuracy))
 
 if __name__ == '__main__':

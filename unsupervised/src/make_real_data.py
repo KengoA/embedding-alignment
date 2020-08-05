@@ -1,3 +1,4 @@
+import argparse
 import scipy
 import pickle
 import numpy as np
@@ -22,27 +23,37 @@ def preprocess_embedding(z):
 
 
 if __name__ == "__main__":
-    n_dim = 30
-    for modality in ['image', 'text']:
-        # if modality == 'text':
-            # emb = pickle.load(open('./data/real/raw/text.glove.50d.pickle','rb'))
+    parser = argparse.ArgumentParser(description='make real dataset from embeddings')
+    parser.add_argument('--n_dim',
+        type=int, help='number of dimensions', default=30)
+    parser.add_argument('--n_concept',
+        type=int, help='number of concepts', default=429)
+    parser.add_argument('--emb_type',
+        type=str, help='type of embeddings, either normal or nn (nonnegative)', default='nn')
+    parser.add_argument('--modality_src',
+        type=str, help='modality of source embeddings', default='text')
+    parser.add_argument('--modality_tgt',
+        type=str, help='modality of target embeddings', default='image')
+    parser.add_argument('--idx_src',
+        type=int, help='index of source embeddings', default=0)
+    parser.add_argument('--idx_tgt',
+        type=int, help='index of target embeddings', default=0)
 
-        # same modality two embeddings test
+    args = parser.parse_args()
 
-        # emb_type = 'nn'
-        emb_type = 'normal'
+    # if args.modality == 'text':
+        # emb = pickle.load(open('./data/real/raw/text.glove.50d.pickle','rb'))
 
-        if modality == 'text':
-            # emb = pickle.load(open(f'./data/real/raw/{emb_type}/emb_text_dim_{n_dim}_2.pickle','rb'))
-            emb = pickle.load(open(f'./data/real/raw/{emb_type}/emb_image_dim_{n_dim}_3.pickle','rb'))
-        else:
-            # emb = pickle.load(open(f'./data/real/raw/{emb_type}/emb_text_dim_{n_dim}_8.pickle','rb'))
-            emb = pickle.load(open(f'./data/real/raw/{emb_type}/emb_image_dim_{n_dim}_9.pickle','rb'))
+    # same modality two embeddings test
 
-        print(list(emb.items())[0]) # check if its actually non-negative
-        n_concept = len(emb.items())
-
-        z = np.zeros((n_concept, n_dim))
+    emb_src = pickle.load(open(f'./data/real/raw/{args.emb_type}/emb_{args.modality_src}_dim_{args.n_dim}_{args.idx_src}.pickle','rb'))
+    emb_tgt = pickle.load(open(f'./data/real/raw/{args.emb_type}/emb_{args.modality_tgt}_dim_{args.n_dim}_{args.idx_tgt}.pickle','rb'))
+    
+    # print('src',list(emb_src.items())[0]) # check if its actually non-negative
+    # print('tgt',list(emb_tgt.items())[0]) # check if its actually non-negative
+    
+    def save_vectors(emb, is_src=True):
+        z = np.zeros((args.n_concept, args.n_dim))
         vocab = list(emb.keys())
 
         for i, word in enumerate(vocab):
@@ -50,20 +61,22 @@ if __name__ == "__main__":
 
         z = preprocess_embedding(z)
 
-        with open(f'./data/real/{modality}.vec','w') as w:
-            w.writelines(f'{n_concept} {n_dim}\n')
+        emb_name = f"{args.emb_type}_{args.modality_src}_{args.idx_src}" if is_src else f"{args.emb_type}_{args.modality_tgt}_{args.idx_tgt}"
+
+        with open(f"./data/real/{emb_name}.vec",'w') as w:
+            w.writelines(f"{args.n_concept} {args.n_dim}\n")
             for i, word in enumerate(vocab):
                 w.writelines(f'{word} {" ".join([str(v) for v in z[i]])}\n')
+        
+        return None
+                
+    save_vectors(emb_src, is_src=True)
+    save_vectors(emb_tgt, is_src=False)
+        
+    print(f'made data for {args.emb_type} emb with {args.n_dim} dims for {args.modality_src} {args.idx_src} and {args.modality_tgt} {args.idx_tgt}')
 
-        with open('./data/crosslingual/dictionaries/text-image.txt','w') as w:
-            for word in vocab:
-                w.writelines(f'{word}	{word}\n')
 
-        with open('./data/crosslingual/dictionaries/image-text.txt','w') as w:
-            for word in vocab:
-                w.writelines(f'{word}	{word}\n')
     
-    print('made data with dim ', n_dim)
 
     ### TESTING WITH SINGLE SYSTEM ROTATION ###
     # n_dim = 50

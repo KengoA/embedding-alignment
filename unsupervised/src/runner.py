@@ -59,7 +59,7 @@ if __name__ == '__main__':
     # get config
     configs, rel_paths = config_helper.get_train_configs(args.config_path)
     mkdir_p(os.path.join(args.save, '{}-{}'.format(args.src, args.tgt)))
-    logger = get_logger(os.path.join(args.save, '{}-{}'.format(args.src, args.tgt), 'logger.txt'))
+    logger = get_logger(os.path.join(args.save, '{}-{}'.format(args.src, args.tgt), 'logger.log'))
     # iterate all possible config combinations
     for config, rel_path in zip(configs, rel_paths):
         # print('config', config)

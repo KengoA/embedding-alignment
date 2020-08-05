@@ -1,3 +1,4 @@
+#!/bin/bash
 # # Run download.sh first if no data directory is empty
 # # Create intersection vocab
 python ./vocab/make_vocab.py

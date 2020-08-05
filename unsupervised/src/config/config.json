@@ -12,7 +12,7 @@
     "lr":0.001,
     "norm":"scale",
     "dp_keep_prob":1.0,
-    "epoch":4000,
-    "wgan_epoch":1000,
+    "epoch":9000,
+    "wgan_epoch":1500,
     "batch_size":429
 }

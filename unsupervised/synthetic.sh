@@ -1,3 +1,4 @@
+#!/bin/bash
 SRC_LANG=z_0; # source language
 TGT_LANG=z_1; # target language
 
@@ -12,7 +13,7 @@ TRAIN_MAX_SIZE=200 # the top N words included in training
 
 python src/make_synthetic_data.py
 
-train the word embedding
+# train the word embedding
 python src/runner.py \
     --config_path src/config/config.json \
     --src "$SRC_LANG" --tgt "$TGT_LANG" \

@@ -311,13 +311,17 @@ class CycleAlignEmb(CycleEmb):
                 model_checker.record_loss(loss_comb, int( (step-0.1) / batch_per_epoch)+1)
                 if step % batch_per_epoch == 0:
                     # print('Epoch  {}, time eclipsed {}'.format(int((step-0.1) / batch_per_epoch)+1, time.time()-epoch_start_time))
-                    epoch_start_time = time.time()
+                    # epoch_start_time = time.time()
+
+                    logger.info('epoch:{0}, step:{1} loss:{2:.4f} Bilingual Induction Accuracy --- {3:.4f}'.format(int( (step-0.1) / batch_per_epoch)+1, step, loss_comb, val_acc))
+
                     if model_checker.check_for_best(loss_comb, int((step-0.1) / batch_per_epoch)+1):
                         save_path = self.saver.save(sess, os.path.join(self.save_path, 'model.ckpt'))
                         best_loss = model_checker.get_best_loss()
                         print(f'Epoch {int((step-0.1) / batch_per_epoch)+1}: Saved at combined loss {best_loss}')
                         if validation is not None and logger is not None:
-                            logger.info('Saved at epoch:{0}, step:{1} loss:{2:.4f} Bilingual Induction Accuracy --- {3:.4f}'.format(int( (step-0.1) / batch_per_epoch)+1, step, best_loss, val_acc))
+                            print('Saved at epoch:{0}, step:{1} loss:{2:.4f} Bilingual Induction Accuracy --- {3:.4f}'.format(int( (step-0.1) / batch_per_epoch)+1, step, best_loss, val_acc))
+                            # logger.info('Saved at epoch:{0}, step:{1} loss:{2:.4f} Bilingual Induction Accuracy --- {3:.4f}'.format(int( (step-0.1) / batch_per_epoch)+1, step, best_loss, val_acc))
                         cur_lr = lr
                     else:
                         cur_lr = lr*0.95
