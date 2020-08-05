@@ -110,4 +110,4 @@ venv_t1/
 
 # data
 data/real/*.vec
-
+*.ipynb
