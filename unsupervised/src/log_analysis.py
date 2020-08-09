@@ -70,8 +70,8 @@ def visualize(exp_dir):
 
             plt.title(f'{title_prefix} {title_main} {title_suffix}', fontsize=16, pad=20)
 
-            plt.text(500,1.02,'     WGAN Loss \n(epochs 0-1500)',fontsize=14)
-            plt.text(2700,1.02,'     Sinkhorn Loss \n(epochs 1501-4500)',fontsize=14)
+            plt.text(500,1.02,'     WGAN Loss Phase \n(epochs 0-1500) ',fontsize=14)
+            plt.text(2700,1.02,'     Sinkhorn Loss Phase \n(epochs 1501-4500)',fontsize=14)
             plt.axvline(x=1500, ls='--')
             plt.xticks(np.arange(0, 4650, 150))
             plt.xlabel('Epochs', fontsize=14)
@@ -87,8 +87,8 @@ def visualize(exp_dir):
             
             textstr = '\n'.join((
                 r'$N=%.1d$' % (N, ),
-                r'$\mu=%.4f$' % (mu, ),
-                r'$\sigma=%.4f$' % (sigma, )))
+                r'$mean=%.4f$' % (mu, ),
+                r'$std=%.4f$' % (sigma, )))
             props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
 
             plt.text(4000, 1.09, textstr, fontsize=14, verticalalignment='top', bbox=props)

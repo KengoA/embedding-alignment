@@ -34,54 +34,50 @@ def main(fp_repo):
     # Settings
     tf.keras.backend.set_floatx('float64')
     n_concept = 200
-
+    max_epoch = 100
     noise = 0.01
-    n_dim = 2
-    fully_unsupervised = False
 
-    if fully_unsupervised:
-        n_restart = 1000
-        sup_size = 0.00
-        max_epoch = 30
-        log_per_epoch = False
+    n_restart = 1
+    log_per_epoch = True
 
-    else:
-        n_restart = 1
-        sup_size = 0.5
-        max_epoch = 100
-        log_per_epoch = True
+    for n_dim in [2,3,4,10,30,50]:
+        for sup_size in [0.01, 0.02, 0.05, 0.10]:
+            for i in range(20):
+                logger = utils.setup_logger(
+                    name_logfile=f'n_dim_{n_dim}_sup_size_{sup_size}_max_epoch_{max_epoch}_{i}.log',
+                    logs_dir='./logs/supervised/',
+                    also_stdout=True
+                    )
 
-    logger = utils.setup_logger(name_logfile=f'n_concept_{n_concept}_noise_{noise}_n_dim_{n_dim}_sup_size_{sup_size}_max_epoch_{max_epoch}.log', logs_dir='../logs/', also_stdout=True)
+                # Load synthetic embeddings.
+                z_0, z_1 = embeddings.noisy_gaussian(n_concept, noise=noise, n_dim=n_dim, seed=i)
 
-    # Load synthetic embeddings.
-    z_0, z_1 = embeddings.noisy_gaussian(n_concept, noise=noise, n_dim=n_dim)
+                # Pre-process embeddings.
+                z_0 = utils.preprocess_embedding(z_0)
+                z_1 = utils.preprocess_embedding(z_1)
 
-    # Pre-process embeddings.
-    z_0 = utils.preprocess_embedding(z_0)
-    z_1 = utils.preprocess_embedding(z_1)
+                # Determine ceiling performance.
+                template = 'Ceiling Accuracy 1: {0:.2f} 5: {1:.2f} 10: {2:.2f} Half: {3:.2f}\n'
+                acc_1, acc_5, acc_10, acc_half = utils.mapping_accuracy(z_0, z_1)
+                # print(template.format(acc_1, acc_5, acc_10, acc_half))
+                logger.info(template.format(acc_1, acc_5, acc_10, acc_half))
 
-    # Determine ceiling performance.
-    template = 'Ceiling Accuracy 1: {0:.2f} 5: {1:.2f} 10: {2:.2f} Half: {3:.2f}\n'
-    acc_1, acc_5, acc_10, acc_half = utils.mapping_accuracy(z_0, z_1)
-    # print(template.format(acc_1, acc_5, acc_10, acc_half))
-    logger.info(template.format(acc_1, acc_5, acc_10, acc_half))
+                # Add random rotation to the second embedding.
+                np.random.seed(3123)
+                rot_mat = scipy.stats.special_ortho_group.rvs(z_0.shape[1])
+                z_1 = np.matmul(z_1, rot_mat)
 
-    # Add random rotation to the second embedding.
-    np.random.seed(3123)
-    rot_mat = scipy.stats.special_ortho_group.rvs(z_0.shape[1])
-    z_1 = np.matmul(z_1, rot_mat)
+                # Shuffle second embedding, but keep track of correct mapping.
+                n_concept = z_0.shape[0]
+                idx_rand = np.random.permutation(n_concept)
+                z_1_shuffle = z_1[idx_rand, :]
+                # Determine correct mapping.
+                y_idx_map = np.argsort(idx_rand)
+                # Verify mapping to be safe.
+                np.testing.assert_array_equal(z_1, z_1_shuffle[y_idx_map, :])
 
-    # Shuffle second embedding, but keep track of correct mapping.
-    n_concept = z_0.shape[0]
-    idx_rand = np.random.permutation(n_concept)
-    z_1_shuffle = z_1[idx_rand, :]
-    # Determine correct mapping.
-    y_idx_map = np.argsort(idx_rand)
-    # Verify mapping to be safe.
-    np.testing.assert_array_equal(z_1, z_1_shuffle[y_idx_map, :])
-
-    # Align embeddings using alignment algorithm 'bdr_0_0_1'.
-    aligners.bdr_0_0_1(z_0, z_1_shuffle, logger, log_per_epoch, y_idx_map, n_dim, max_epoch, sup_size, n_restart)
+                # Align embeddings using alignment algorithm 'bdr_0_0_1'.
+                aligners.bdr_0_0_1(z_0, z_1_shuffle, logger, log_per_epoch, y_idx_map, n_dim, max_epoch, sup_size, n_restart)
 
 
 if __name__ == "__main__":

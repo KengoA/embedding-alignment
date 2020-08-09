@@ -32,3 +32,6 @@ unsupervised/misc/*
 .pytest_cache/*
 */venv_tf1/*
 venv/*
+
+
+semi-supervised/logs/*

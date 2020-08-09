@@ -67,7 +67,7 @@ def bdr_0_0_1(x, y, logger, log_per_epoch=True, y_idx_map=None, n_dim=2, max_epo
     # sup_size = 0.05
     x_sup_idx = np.random.choice(y_idx_map.size, int(y_idx_map.size*sup_size))
     y_sup_idx = y_idx_map[x_sup_idx]
-    print('supervised: ', len(y_sup_idx))
+    logger.info(f'supervised: {" ".join([str(idx) for idx in y_sup_idx])}')
 
     # Setup.
     n_concept = x.shape[0]
@@ -76,10 +76,8 @@ def bdr_0_0_1(x, y, logger, log_per_epoch=True, y_idx_map=None, n_dim=2, max_epo
     n_dim_x = x.shape[1]
     n_dim_y = y.shape[1]
     n_sample = n_concept * 10 # TODO
-    # n_sample = n_concept * 50  # TODO
 
     optimizer = tf.keras.optimizers.Adam()
-    # optimizer = tf.keras.optimizers.Adam(learning_rate=0.005)
     mse_loss_func = tf.keras.losses.MeanSquaredError()
 
     # Pre-assemble GMM.
