@@ -3,7 +3,6 @@ DATA_ROOT=./data/;
 TRAIN_MAX_SIZE=429; # the top N words included in training
 N_DIM=30;
 
-
 python src/make_dictionaries.py
 
 #!/bin/bash
@@ -11,9 +10,9 @@ for MODALITY in "text" "image"
 do 
     for EMB_TYPE in "nn" "normal"
     do
-        for IDX_SRC in {0..9}
+        for IDX_SRC in {0..3}
         do
-            for IDX_TGT in {0..9}
+            for IDX_TGT in {0..3}
             do
                 if [ "$IDX_SRC" -ne "$IDX_TGT" ]
                 then
@@ -28,7 +27,7 @@ do
 
                     # train the word embedding
                     python src/runner.py \
-                        --config_path src/config/config.json \
+                        --config_path src/config/config_real.json \
                         --src "$EMB_TYPE"_"$MODALITY"_"$IDX_SRC" --tgt "$EMB_TYPE"_"$MODALITY"_"$IDX_TGT" \
                         --src_vec "$DATA_ROOT"real/"$EMB_TYPE"_"$MODALITY"_"$IDX_SRC".vec \
                         --tgt_vec "$DATA_ROOT"real/"$EMB_TYPE"_"$MODALITY"_"$IDX_TGT".vec \

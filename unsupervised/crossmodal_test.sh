@@ -6,7 +6,7 @@ N_DIM=30;
 python src/make_dictionaries.py
 
 EMB_TYPE="normal";
-IDX_SRC=2;
+IDX_SRC=3;
 IDX_TGT=3;
 
 python src/make_real_data.py \
@@ -14,7 +14,7 @@ python src/make_real_data.py \
     --n_concept "$TRAIN_MAX_SIZE" \
     --emb_type "$EMB_TYPE" \
     --modality_src "text" \
-    --modality_src "image" \
+    --modality_tgt "image" \
     --idx_src "$IDX_SRC" \
     --idx_tgt "$IDX_TGT";
 

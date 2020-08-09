@@ -36,7 +36,7 @@ def main(fp_repo):
     n_concept = 200
 
     noise = 0.01
-    n_dim = 30
+    n_dim = 2
     fully_unsupervised = False
 
     if fully_unsupervised:
@@ -47,7 +47,7 @@ def main(fp_repo):
 
     else:
         n_restart = 1
-        sup_size = 0.05
+        sup_size = 0.5
         max_epoch = 100
         log_per_epoch = True
 

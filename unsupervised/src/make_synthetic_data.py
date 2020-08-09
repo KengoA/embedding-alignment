@@ -18,13 +18,13 @@ def preprocess_embedding(z):
     max_val = np.max(np.abs(z_norm))
     z_norm = z_norm / max_val
     z_norm = z_norm / 2  # TODO experimenting with different scales here
-    z_norm + 1  # TODO
+    # z_norm + 1  # TODO
     return z_norm
 
 
 if __name__ == "__main__":
     n_concept = 200
-    n_dim = 20
+    n_dim = 2
 
     z_0 = np.random.randn(n_concept, n_dim)
     z_1 = z_0 + 0.01 * np.random.randn(n_concept, n_dim)
@@ -42,12 +42,10 @@ if __name__ == "__main__":
     np.testing.assert_array_equal(z_1, z_1_shuffle[y_idx_map, :])
 
     with open('./data/synthetic/z_0.vec','w') as w:
-        w.writelines(f'{n_concept} {n_dim}\n')
         for i in range(n_concept):
             w.writelines(f'{i} {" ".join([str(v) for v in z_0[i]])}\n')
 
     with open('./data/synthetic/z_1.vec','w') as w:
-        w.writelines(f'{n_concept} {n_dim}\n')
         for i in range(n_concept):
             w.writelines(f'{y_idx_map[i]} {" ".join([str(v) for v in z_1_shuffle[y_idx_map[i]]])}\n')
     

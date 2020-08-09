@@ -14,5 +14,5 @@
     "dp_keep_prob":1.0,
     "epoch":9000,
     "wgan_epoch":1500,
-    "batch_size":429
+    "batch_size":200
 }

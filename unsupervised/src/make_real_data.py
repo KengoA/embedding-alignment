@@ -16,8 +16,8 @@ def preprocess_embedding(z):
     mu = gmm.means_[0]
     sigma = gmm.covariances_[0]
     z_norm = z - mu
-    z_norm /= np.max(np.abs(z_norm))
-    z_norm /= 2  # TODO experimenting with different scales here
+    # z_norm /= np.max(np.abs(z_norm))
+    # z_norm /= 2  # TODO experimenting with different scales here
     
     return z_norm
 
@@ -64,7 +64,6 @@ if __name__ == "__main__":
         emb_name = f"{args.emb_type}_{args.modality_src}_{args.idx_src}" if is_src else f"{args.emb_type}_{args.modality_tgt}_{args.idx_tgt}"
 
         with open(f"./data/real/{emb_name}.vec",'w') as w:
-            w.writelines(f"{args.n_concept} {args.n_dim}\n")
             for i, word in enumerate(vocab):
                 w.writelines(f'{word} {" ".join([str(v) for v in z[i]])}\n')
         
