@@ -32,7 +32,7 @@ do
                         --src_vec "$DATA_ROOT"real/"$EMB_TYPE"_"$MODALITY"_"$IDX_SRC".vec \
                         --tgt_vec "$DATA_ROOT"real/"$EMB_TYPE"_"$MODALITY"_"$IDX_TGT".vec \
                         --train_max_size "$TRAIN_MAX_SIZE" \
-                        --save ./exp/ \
+                        --save ./exp/real/ \
                         --train 1 \
                         --F_validation "$DATA_ROOT"crosslingual/dictionaries/src-tgt.txt;
 
@@ -42,12 +42,12 @@ do
                     python src/eval/eval_translation.py \
                         exp/"$EXP_NAME"/src.emb.txt exp/"$EXP_NAME"/tgt.trans.emb.txt \
                         -d data/crosslingual/dictionaries/src-tgt.txt \
-                        --exp_dir exp/"$EXP_NAME";
+                        --exp_dir exp/real/"$EXP_NAME";
                     
                     python src/eval/eval_translation.py \
                         exp/"$EXP_NAME"/tgt.emb.txt exp/"$EXP_NAME"/src.trans.emb.txt \
                         -d data/crosslingual/dictionaries/src-tgt.txt \
-                        --exp_dir exp/"$EXP_NAME";
+                        --exp_dir exp/real/"$EXP_NAME";
                 fi
             done
         done

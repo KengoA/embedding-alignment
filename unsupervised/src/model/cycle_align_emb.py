@@ -35,9 +35,9 @@ DEBUG = False
 LAMBDA_SH = 10
 SINKHORN_LAYER_DEPTH = 20
 MULTIPLE_NOISE_STD = None # add noise to sinkhorn layers
-PATIENCE = 10000 # number of epochs we wait before call early stop
+PATIENCE = 500 # number of epochs we wait before call early stop
 MIN_DELTA = 1e-5 # improvement larger than delta is considered as improvement
-# MIN_DELTA = 1e-8 # improvement larger than delta is considered as improvement
+# MIN_DELTA = 1e-12 # improvement larger than delta is considered as improvement
 
 ################################################################################
 ### The cross-lingual embeding model learned from cycle adversarial network
@@ -162,7 +162,7 @@ class CycleAlignEmb(CycleEmb):
         batch_per_epoch = int(self.vecs_list[0].shape[0]/batch_size) + 1 # how many steps in a epoch
         total_steps = batch_per_epoch * epoch
         early_stopper = EarlyStopper(patience*batch_per_epoch, min_delta)
-        model_checker = ModelChecker()
+        model_checker = ModelChecker(min_delta=MIN_DELTA)
 
         learning_rate = tf.placeholder(tf.float32, shape=[])
         lr_schedule_dict = SGDWR(T_total=epoch, T_0=10, T_mult=1.2, lr_max=lr, lr_min=lr/100)
@@ -273,11 +273,11 @@ class CycleAlignEmb(CycleEmb):
                         _, step, loss_reconstruct, loss_comb, init_align_loss, summary = sess.run([sh_trans_train_op, global_step, self.reconstruct_loss, self.l_trans_sh, self.init_align_loss, self.merged_summary], feed_dict)
 
                     # handle early stopping
-                    # if step % batch_per_epoch == 0:
-                    # if early_stopper.check_early_stop(loss_comb, int( (step-0.1) / batch_per_epoch)+1):
-                    #     logger.info('Epoch, {0} early stopping!'.format(int( (step-0.1) / batch_per_epoch)+1))
-                    #     print('Epoch, {0} early stopping!'.format(int( (step-0.1) / batch_per_epoch)+1))
-                    #     break
+                    if step % batch_per_epoch == 0:
+                        if early_stopper.check_early_stop(loss_comb, int( (step-0.1) / batch_per_epoch)+1):
+                            logger.info('Epoch, {0} early stopping!'.format(int( (step-0.1) / batch_per_epoch)+1))
+                            print('Epoch, {0} early stopping!'.format(int( (step-0.1) / batch_per_epoch)+1))
+                            break
                 else:
                     print('ERROR: Invalid config for training!')
 
@@ -299,11 +299,10 @@ class CycleAlignEmb(CycleEmb):
                         nnr_tgt = self.find_nearest_gpu(validation[0], src2tgt=True, batch_size=batch_size, sess=sess)
                         # print('nnr_tgt[:10]:', nnr_tgt[:10])
                         val_acc = knn_accuracy_from_list(nnr_tgt, validation[1], k=1)
-                        stdout_buffer += 'Bilex acc:{0:.4f} '.format(val_acc)
+                        stdout_buffer += 'Bilex acc:{0:.4f} loss:{1:.8f}\n'.format(val_acc, loss_comb)
                         val_acc_value = tf.Summary.Value(tag='val_acc', simple_value=val_acc)
                         self.writer.add_summary(tf.Summary(value=[val_acc_value]), step)
 
-                    stdout_buffer += 'Validation eclipsed time \n'.format(time.time()-validation_start_time)
                     sys.stdout.write(stdout_buffer)
                     sys.stdout.flush()
 
@@ -313,14 +312,14 @@ class CycleAlignEmb(CycleEmb):
                     # print('Epoch  {}, time eclipsed {}'.format(int((step-0.1) / batch_per_epoch)+1, time.time()-epoch_start_time))
                     # epoch_start_time = time.time()
 
-                    logger.info('epoch:{0}, step:{1} loss:{2:.4f} Bilingual Induction Accuracy --- {3:.4f}'.format(int( (step-0.1) / batch_per_epoch)+1, step, loss_comb, val_acc))
+                    logger.info('epoch:{0}, step:{1} loss:{2:.8f} Bilingual Induction Accuracy --- {3:.4f}'.format(int( (step-0.1) / batch_per_epoch)+1, step, loss_comb, val_acc))
 
                     if model_checker.check_for_best(loss_comb, int((step-0.1) / batch_per_epoch)+1):
                         save_path = self.saver.save(sess, os.path.join(self.save_path, 'model.ckpt'))
                         best_loss = model_checker.get_best_loss()
                         print(f'Epoch {int((step-0.1) / batch_per_epoch)+1}: Saved at combined loss {best_loss}')
                         if validation is not None and logger is not None:
-                            print('Saved at epoch:{0}, step:{1} loss:{2:.4f} Bilingual Induction Accuracy --- {3:.4f}'.format(int( (step-0.1) / batch_per_epoch)+1, step, best_loss, val_acc))
+                            print('Saved at epoch:{0}, step:{1} loss:{2:.8f} Bilingual Induction Accuracy --- {3:.4f}'.format(int( (step-0.1) / batch_per_epoch)+1, step, best_loss, val_acc))
                             # logger.info('Saved at epoch:{0}, step:{1} loss:{2:.4f} Bilingual Induction Accuracy --- {3:.4f}'.format(int( (step-0.1) / batch_per_epoch)+1, step, best_loss, val_acc))
                         cur_lr = lr
                     else:

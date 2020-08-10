@@ -18,7 +18,6 @@ def preprocess_embedding(z):
     z_norm = z - mu
     # z_norm /= np.max(np.abs(z_norm))
     # z_norm /= 2  # TODO experimenting with different scales here
-    
     return z_norm
 
 

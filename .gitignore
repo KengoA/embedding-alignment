@@ -22,6 +22,10 @@ cooccur/enwiki/data/preprocessed/*.txt
 unsupervised/src/utils/__pycache__/*
 unsupervised/src/exp/*/graph/*
 unsupervised/misc/*
+unsupervised/data/synthetic/*
+unsupervised/exp/synthetic/*
+unsupervised/exp/within_v2/*
+
 
 # Python egg metadata, regenerated from source files by setuptools.
 /*.egg-info
@@ -33,5 +37,6 @@ unsupervised/misc/*
 */venv_tf1/*
 venv/*
 
-
 semi-supervised/logs/*
+analysis/*.ipynb
+*/*.ipynb_checkpoints/*

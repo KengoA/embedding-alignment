@@ -95,7 +95,7 @@ def load_text_vec(fname, splitter=' ', vocab_size=None, top_n=None, norm=None):
 
         for line in tqdm(f.readlines()[:min(vocab_size,top_n)+1]):
             ss = line.split(' ')
-            if len(ss) <= 3:
+            if len(ss) <= 2:
                 continue
             word = ss[0]
             dims = ' '.join(ss[1:]).strip().split(splitter)
