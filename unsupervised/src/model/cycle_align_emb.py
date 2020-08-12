@@ -35,8 +35,8 @@ DEBUG = False
 LAMBDA_SH = 10
 SINKHORN_LAYER_DEPTH = 20
 MULTIPLE_NOISE_STD = None # add noise to sinkhorn layers
-PATIENCE = 500 # number of epochs we wait before call early stop
-MIN_DELTA = 1e-5 # improvement larger than delta is considered as improvement
+PATIENCE = 10000 # number of epochs we wait before call early stop
+MIN_DELTA = 1e-6 # improvement larger than delta is considered as improvement
 # MIN_DELTA = 1e-12 # improvement larger than delta is considered as improvement
 
 ################################################################################
@@ -168,8 +168,8 @@ class CycleAlignEmb(CycleEmb):
         lr_schedule_dict = SGDWR(T_total=epoch, T_0=10, T_mult=1.2, lr_max=lr, lr_min=lr/100)
 
         if self.F_init is None: # we will switch from WGAN to Sinkhorn during training
-            swith_flag = False # first WGAN and then Sinkhorn
-            # swith_flag = True # Use Sinkhorn all the time
+            # swith_flag = False # first WGAN and then Sinkhorn
+            swith_flag = True # Use Sinkhorn all the time
 
         with tf.Session(config=self.session_conf) as sess:
             # sess = tf_debug.LocalCLIDebugWrapperSession(sess)
@@ -244,8 +244,7 @@ class CycleAlignEmb(CycleEmb):
                     feed_dict[self.input_s_init] = self.init_vecs_list[0]
                     feed_dict[self.input_t_init] = self.init_vecs_list[1]
 
-                if self.F_init is None and (not swith_flag): 
-                    
+                if self.F_init is None and (not swith_flag):
                     # update WGAN disc models
                     for _ in range(DISC_ITERS):
                         _, l_disc, l_trans_wgan = sess.run([disc_train_op, self.l_disc, self.l_trans_wgan], feed_dict)
@@ -253,9 +252,10 @@ class CycleAlignEmb(CycleEmb):
 
                     # update WGAN transfer models
                     # for _ in range(WGAN_TRANS_ITERS):
-                    _, step, loss_reconstruct, loss_comb, l_trans_wgan, summary = sess.run([wgan_trans_train_op, global_step, self.reconstruct_loss, self.sinkhorn_distance, self.l_trans_wgan, self.merged_summary], feed_dict)
+                    _, step, loss_reconstruct, loss_comb, l_trans_wgan, summary = \
+                    sess.run([wgan_trans_train_op, global_step, self.reconstruct_loss, self.sinkhorn_distance, self.l_trans_wgan, self.merged_summary], feed_dict)
                     # print("l_trans_wgan after wgan_trans_train_op", l_trans_wgan)
-
+                    
                     # judge convergence, if so, switch training loss
                     # if early_stopper.check_early_stop(loss_comb, int( (step-0.1) / batch_per_epoch)+1) or step > total_steps/2:
                     if step > wgan_epoch * batch_per_epoch:
@@ -270,8 +270,7 @@ class CycleAlignEmb(CycleEmb):
                         cur_lr = lr
                 elif self.use_sinkhorn: # update sinkhorn transfer models
                     for _ in range(TRANS_ITER):
-                        _, step, loss_reconstruct, loss_comb, init_align_loss, summary = sess.run([sh_trans_train_op, global_step, self.reconstruct_loss, self.l_trans_sh, self.init_align_loss, self.merged_summary], feed_dict)
-
+                        _, step, loss_reconstruct, loss_comb, init_align_loss, summary = sess.run([sh_trans_train_op, global_step, self.reconstruct_loss,  self.l_trans_sh, self.init_align_loss, self.merged_summary], feed_dict)
                     # handle early stopping
                     if step % batch_per_epoch == 0:
                         if early_stopper.check_early_stop(loss_comb, int( (step-0.1) / batch_per_epoch)+1):
@@ -282,7 +281,7 @@ class CycleAlignEmb(CycleEmb):
                     print('ERROR: Invalid config for training!')
 
                 # validation and print
-                if step % (50*batch_per_epoch) == 0:
+                if step % (5 * batch_per_epoch) == 0:
                     validation_start_time = time.time()
                     stdout_buffer = ''
                     self.writer.add_summary(summary, step)
@@ -299,19 +298,22 @@ class CycleAlignEmb(CycleEmb):
                         nnr_tgt = self.find_nearest_gpu(validation[0], src2tgt=True, batch_size=batch_size, sess=sess)
                         # print('nnr_tgt[:10]:', nnr_tgt[:10])
                         val_acc = knn_accuracy_from_list(nnr_tgt, validation[1], k=1)
-                        stdout_buffer += 'Bilex acc:{0:.4f} loss:{1:.8f}\n'.format(val_acc, loss_comb)
+                        
+                        # check individual losses
+                        loss_recon, loss_sh, loss_wgan = sess.run([self.reconstruct_loss, self.sinkhorn_distance, self.l_gen], feed_dict)
+                        stdout_buffer += 'Bilex acc:{0:.4f} recon_loss:{1:.8f} sh_loss:{2:.8f} wgan_loss:{3:.8f} loss_comb:{4:.8f}'.format(
+                            val_acc, loss_recon, loss_sh, loss_wgan, loss_comb)
+
                         val_acc_value = tf.Summary.Value(tag='val_acc', simple_value=val_acc)
                         self.writer.add_summary(tf.Summary(value=[val_acc_value]), step)
-
-                    sys.stdout.write(stdout_buffer)
+                    
+                    logger.info(stdout_buffer)
+                    sys.stdout.write(stdout_buffer+'\n')
                     sys.stdout.flush()
 
                 # check objective to save the best model
                 model_checker.record_loss(loss_comb, int( (step-0.1) / batch_per_epoch)+1)
                 if step % batch_per_epoch == 0:
-                    # print('Epoch  {}, time eclipsed {}'.format(int((step-0.1) / batch_per_epoch)+1, time.time()-epoch_start_time))
-                    # epoch_start_time = time.time()
-
                     logger.info('epoch:{0}, step:{1} loss:{2:.8f} Bilingual Induction Accuracy --- {3:.4f}'.format(int( (step-0.1) / batch_per_epoch)+1, step, loss_comb, val_acc))
 
                     if model_checker.check_for_best(loss_comb, int((step-0.1) / batch_per_epoch)+1):
@@ -320,7 +322,9 @@ class CycleAlignEmb(CycleEmb):
                         print(f'Epoch {int((step-0.1) / batch_per_epoch)+1}: Saved at combined loss {best_loss}')
                         if validation is not None and logger is not None:
                             print('Saved at epoch:{0}, step:{1} loss:{2:.8f} Bilingual Induction Accuracy --- {3:.4f}'.format(int( (step-0.1) / batch_per_epoch)+1, step, best_loss, val_acc))
-                            # logger.info('Saved at epoch:{0}, step:{1} loss:{2:.4f} Bilingual Induction Accuracy --- {3:.4f}'.format(int( (step-0.1) / batch_per_epoch)+1, step, best_loss, val_acc))
+                            logger.info('Saved at epoch:{0}, step:{1} loss:{2:.8f} Bilingual Induction Accuracy --- {3:.4f}'.format(int( (step-0.1) / batch_per_epoch)+1, step, best_loss, val_acc))
+                            if val_acc > 0.95:
+                                break                        
                         cur_lr = lr
                     else:
                         cur_lr = lr*0.95

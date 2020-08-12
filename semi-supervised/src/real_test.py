@@ -77,11 +77,11 @@ def main(fp_repo):
         log_per_epoch = False
 
     else:
-        sup_size = 0.30
-        max_epoch = 10000
+        sup_size = 0.05
+        max_epoch = 1000
         log_per_epoch = True
 
-    logger = utils.setup_logger(name_logfile=f'real_sup_size_{sup_size}.log', logs_dir='../logs/', also_stdout=True)
+    logger = utils.setup_logger(name_logfile=f'real_sup_size_{sup_size}.log', logs_dir='./logs/', also_stdout=True)
 
     # Determine ceiling performance.
     # template = 'Ceiling Accuracy 1: {0:.2f} 5: {1:.2f} 10: {2:.2f} Half: {3:.2f}\n'

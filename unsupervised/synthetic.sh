@@ -4,7 +4,7 @@ TRAIN_MAX_SIZE=200 # the top N words included in training
 
 for N_DIM in 4 10 30 50
 do
-    for ITER in {1..20}
+    for ITER in {11..20}
     do
         python src/make_synthetic_data.py \
             --n_dim "$N_DIM" \

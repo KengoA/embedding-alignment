@@ -162,9 +162,9 @@ def create_n_systems(n_epicentres=1,
         return systems, return_noisy_X
 
 def load_text_and_image():
-    data = pickle.load(open('../assets/embeddings/preprocessed/text-image.pickle','rb'))
-    z_0 = data['z_text']
-    z_1 = data['z_image']
+    data = pickle.load(open('./data/preprocessed/text-image.pickle','rb'))
+    z_0 = data['z_0']
+    z_1 = data['z_1']
     vocab = data['vocab']
     return z_0, z_1, vocab
 

@@ -2,14 +2,14 @@ import pickle
 import numpy as np
 
 if __name__ == '__main__':
-    emb_dir = '../../glove/data/embeddings'
+    emb_dir = '../glove/data/embeddings'
     n_dim = 30
     emb_type = 'nn'
-    text_path = f'{emb_dir}/{emb_type}/emb_text_dim_{n_dim}_0.pickle'
+    text_path = f'{emb_dir}/{emb_type}/emb_image_dim_{n_dim}_3.pickle'
     # text_path = f'{emb_dir}/{emb_type}/emb_text_dim_{n_dim}_1.pickle'
 
     # image_path = f"{emb_dir}/emb_image_dim_{n_dim}_0.pickle"
-    image_path = f'{emb_dir}/{emb_type}/emb_image_dim_{n_dim}_0.pickle'
+    image_path = f'{emb_dir}/{emb_type}/emb_image_dim_{n_dim}_1.pickle'
     # image_path = f'{emb_dir}/{emb_type}/emb_text_dim_{n_dim}_1.pickle'
 
     # text_path = f'{emb_dir}/emb_text_dim_{n_dim}_0.pickle'
@@ -29,5 +29,5 @@ if __name__ == '__main__':
             z_image.append(emb_image[key])
     
     data = {'z_0': np.array(z_text), 'z_1':np.array(z_image), 'vocab': np.array(vocab)}
-    with open('./preprocessed/text-image.pickle','wb') as w:
+    with open(f'./data/preprocessed/text-image.pickle','wb') as w:
         pickle.dump(data, w)
