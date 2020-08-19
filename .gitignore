@@ -38,5 +38,7 @@ unsupervised/exp/within_v2/*
 venv/*
 
 semi-supervised/logs/*
-analysis/*.ipynb
-*/*.ipynb_checkpoints/*
+# analysis/*.ipynb
+# */*.ipynb_checkpoints/*
+analysis/word_similarity/glove.6B.50d.txt
+analysis/.ipynb_checkpoints/*

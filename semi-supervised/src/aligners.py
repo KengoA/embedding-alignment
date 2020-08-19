@@ -228,7 +228,7 @@ def bdr_0_0_1(x, y, logger, log_per_epoch=True, y_idx_map=None, n_dim=2, max_epo
                 acc_g1, acc_g5, acc_g10, acc_ghalf = utils.mapping_accuracy(g_y[y_idx_map], x)
 
             # Evaluate performance.
-            if np.mod(i_epoch, 2) == 0:
+            if np.mod(i_epoch, 1) == 0:
                 # display_state(x, y[y_idx_map], f_x, g_y[y_idx_map])
                 # plt.show(block=False)
                 # plt.pause(.01)

@@ -45,7 +45,7 @@ def main(fp_repo):
             for i in range(20):
                 logger = utils.setup_logger(
                     name_logfile=f'n_dim_{n_dim}_sup_size_{sup_size}_max_epoch_{max_epoch}_{i}.log',
-                    logs_dir='./logs/supervised/',
+                    logs_dir='./logs/exp_linear/',
                     also_stdout=True
                     )
 

@@ -31,6 +31,7 @@ def append_tokens_from_txt(write_dir, read_path):
                 stream_time,
                 round(count/1000000,2))
                 )
+    return count
 
 if __name__ == "__main__":
     write_dir = './data/preprocessed/'
@@ -39,4 +40,13 @@ if __name__ == "__main__":
     read_paths = sorted(glob.glob(read_dir+'enwiki_*'))
     stream_times = []
     print("Preprocessing {} files under {} ...".format(len(read_paths), read_dir))
-    Parallel(n_jobs=-1, verbose=10)(delayed(append_tokens_from_txt)(write_dir, read_path) for read_path in read_paths)
+
+    # Parallel(n_jobs=-1, verbose=10)(delayed(append_tokens_from_txt)(write_dir, read_path) for read_path in read_paths)
+
+    count = 0
+    for read_path in read_paths:
+        count += append_tokens_from_txt(write_dir, read_path)
+        # print(count)
+
+    print(count)
+    print("== Tokens: {1:.2f} M ==".format(round(count/1000000,2)))
