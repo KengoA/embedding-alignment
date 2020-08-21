@@ -130,15 +130,15 @@ def bdr_0_0_1(x, y, logger, log_per_epoch=True, y_idx_map=None, n_dim=2, max_epo
         return cycle_loss
 
     # @tf.function
-    def train_full_step(x_all, y_all, gmm_x_samples, gmm_x_log_prob, gmm_y_samples, gmm_y_log_prob, loss_distr_scale):
+    def train_full_step(x_all, y_all, gmm_x_samples, gmm_y_samples, loss_distr_scale):
         with tf.GradientTape() as tape_f0:
             f_x = model_f(x_all)
-            dist_loss_f = loss_distr_scale * distribution_loss(f_x, gmm_y_samples, gmm_y_log_prob, gmm_scale)
+            dist_loss_f = loss_distr_scale * distribution_loss(f_x, gmm_y_samples, gmm_scale)
         gradients_target_fx = tape_f0.gradient(dist_loss_f, model_f.trainable_variables)
 
         with tf.GradientTape() as tape_g0:
             g_y = model_g(y_all)
-            dist_loss_g = loss_distr_scale * distribution_loss(g_y, gmm_x_samples, gmm_x_log_prob, gmm_scale)
+            dist_loss_g = loss_distr_scale * distribution_loss(g_y, gmm_x_samples, gmm_scale)
         gradients_target_gy = tape_g0.gradient(dist_loss_g, model_g.trainable_variables)
 
         # Combine gradients.
@@ -193,8 +193,6 @@ def bdr_0_0_1(x, y, logger, log_per_epoch=True, y_idx_map=None, n_dim=2, max_epo
         gmm_y = assemble_gmm(y, gmm_scale)
         gmm_x_samples = tf.constant(x, dtype=K.floatx())
         gmm_y_samples = tf.constant(y, dtype=K.floatx())
-        gmm_x_log_prob = tf.reduce_mean(gmm_x.log_prob(gmm_x_samples), axis=0)
-        gmm_y_log_prob = tf.reduce_mean(gmm_y.log_prob(gmm_y_samples), axis=0)
 
         for i_epoch in range(max_epoch):
             idx_batch = np.random.permutation(n_concept)
@@ -215,7 +213,7 @@ def bdr_0_0_1(x, y, logger, log_per_epoch=True, y_idx_map=None, n_dim=2, max_epo
                 sup_loss_f = 0
                 sup_loss_g = 0
 
-            dist_loss_f, dist_loss_g = train_full_step(x, y, gmm_x_samples, gmm_x_log_prob, gmm_y_samples, gmm_y_log_prob, loss_distr_scale)
+            dist_loss_f, dist_loss_g = train_full_step(x, y, gmm_x_samples, gmm_y_samples, loss_distr_scale)
             # dist_loss_f, dist_loss_g = 0, 0
             loss_total = dist_loss_f + dist_loss_g + cycle_loss + sup_loss_f + sup_loss_g
 
@@ -287,12 +285,7 @@ def bdr_0_0_1(x, y, logger, log_per_epoch=True, y_idx_map=None, n_dim=2, max_epo
         if y_idx_map is not None:
             acc_f1, acc_f5, acc_f10, acc_fhalf = utils.mapping_accuracy(f_x, y[y_idx_map])
             acc_g1, acc_g5, acc_g10, acc_ghalf = utils.mapping_accuracy(g_y[y_idx_map], x)
-            # print(
-                # template_acc.format('f(x)', acc_f1, acc_f5, acc_f10, acc_fhalf)
-            # )
-            # print(
-                # template_acc.format('g(y)', acc_g1, acc_g5, acc_g10, acc_ghalf)
-            # )
+
             logger.info(
                 f'Restart:{i_restart}'+ 
                 template_acc.format('f(x)', acc_f1, acc_f5, acc_f10, acc_fhalf) +
@@ -307,12 +300,7 @@ def bdr_0_0_1(x, y, logger, log_per_epoch=True, y_idx_map=None, n_dim=2, max_epo
 
     acc_f1, acc_f5, acc_f10, acc_fhalf = utils.mapping_accuracy(f_x, y[y_idx_map])
     acc_g1, acc_g5, acc_g10, acc_ghalf = utils.mapping_accuracy(g_y[y_idx_map], x)
-    # print(
-    #     template_acc.format('f(x)', acc_f1, acc_f5, acc_f10, acc_fhalf)
-    # )
-    # print(
-    #     template_acc.format('g(y)', acc_g1, acc_g5, acc_g10, acc_ghalf)
-    # )
+
     logger.info(template_acc.format('f(x)', acc_f1, acc_f5, acc_f10, acc_fhalf) + template_acc.format('g(y)', acc_g1, acc_g5, acc_g10, acc_ghalf))
 
     # display_state(x, y[y_idx_map], f_x, g_y[y_idx_map])
@@ -494,7 +482,7 @@ def assemble_gmm(x, gmm_scale):
     return gmm
 
 
-def distribution_loss(fx, gmm_y_samples, gmm_y_log_prob, gmm_scale):
+def distribution_loss(fx, gmm_y_samples, gmm_scale):
     """Distribution loss.
 
     Use upperbound of GMM KL divergence approximation.
@@ -524,7 +512,7 @@ def distribution_loss(fx, gmm_y_samples, gmm_y_log_prob, gmm_scale):
         )
     )
 
-    loss_kl = gmm_y_log_prob - tf.reduce_mean(
+    loss_kl = - tf.reduce_mean(
         gmm_fx.log_prob(gmm_y_samples), axis=0
     )
     return loss_kl
